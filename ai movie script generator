@@ -1,0 +1,96 @@
+import openai
+import re
+
+# Set up OpenAI API key
+openai.api_key = "your_api_key"
+
+# Set up GPT-3 parameters
+prompt = ("""
+INTRODUCTION: Set the scene and introduce the main characters.
+
+INCITING INCIDENT: The event that sets the story in motion and creates the central conflict.
+
+RISING ACTION: The events that build tension and escalate the conflict.
+
+MIDPOINT: A turning point in the story, where the protagonist's fortunes change.
+
+FALLING ACTION: The events that follow the midpoint, where the tension begins to dissipate.
+
+CLIMAX: The final confrontation, where the conflict reaches its peak.
+
+RESOLUTION: The final outcome of the story, where loose ends are tied up and the protagonist undergoes a transformation.
+
+FADE IN:
+[Introduce the story and set the scene with a brief description of the opening shot.]
+
+INT./EXT. LOCATION - DAY/NIGHT
+[Set up the first scene with a description of the location, time of day, and any other relevant details.]
+
+CHARACTER NAME
+[Introduce the character and provide a brief description of their appearance and personality.]
+
+DIALOGUE
+[Write the character's dialogue, including any action or reaction they have during the conversation.]
+
+CUT TO:
+[Move to the next scene with a brief description of the next shot.]
+
+INT./EXT. LOCATION - DAY/NIGHT
+[Set up the next scene with a description of the location, time of day, and any other relevant details.]
+
+CHARACTER NAME
+[Introduce the next character and provide a brief description of their appearance and personality.]
+
+DIALOGUE
+[Write the character's dialogue, including any action or reaction they have during the conversation.]
+
+CUT TO:
+[Repeat steps 5-8 as needed to continue the story.]
+
+FADE OUT:
+[End the script with a brief description of the final shot or scene.]
+""")
+model = "text-davinci-002"
+max_tokens = 1024
+temperature = 0.5
+top_p = 1
+frequency_penalty = 0
+presence_penalty = 0
+
+# Define a function to generate a prompt for a given script section
+def generate_prompt(section):
+    if section == "Introduction":
+        prompt = "FADE IN: [Introduce the story and set the scene with a brief description of the opening shot.]"
+    elif section == "Inciting Incident":
+        prompt = "INCITING INCIDENT: "
+    elif section == "Rising Action":
+        prompt = "RISING ACTION: "
+    elif section == "Midpoint":
+        prompt = "MIDPOINT: "
+    elif section == "Falling Action":
+        prompt = "FALLING ACTION: "
+    elif section == "Climax":
+        prompt = "CLIMAX: "
+    elif section == "Resolution":
+        prompt = "RESOLUTION: "
+    else:
+        raise ValueError("Invalid section name.")
+    return prompt
+
+# Define a function to generate a script section based on user input
+def generate_section(section_name, previous_text):
+    prompt = generate_prompt(section_name) + previous_text
+    response = openai.Completion.create(
+        engine=model,
+        prompt=prompt,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        top_p=top_p,
+        frequency_penalty=frequency_penalty,
+        presence_penalty=presence_penalty,
+        stop=["CUT TO:"]
+    )
+    text = response.choices[0].text
+    return re.sub(r"(FADE IN:|CUT TO:)\s?", "", text).strip()
+
+# Set up the
